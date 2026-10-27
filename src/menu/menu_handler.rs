@@ -30,7 +30,13 @@ pub enum AppState {
     Playing,
     GameOver,
     GamePaused,
+    Keybind,
     Quit,
+}
+
+pub enum Action {
+    // Spielaktionen hier definiert
+    Action1
 }
 
 /// Simple layout container for button definitions.
@@ -47,12 +53,18 @@ struct ButtonDef {
 /// we only need to manually track the mouse state for edge detection (clicks).
 pub struct Menu {
     was_mouse_down: bool,
+    key_capture: Option<Action>,
+    binding_message: String,
+    keybindings_return_to_pause: bool,
 }
 
 impl Menu {
     pub fn new() -> Self {
         Self {
             was_mouse_down: false,
+            key_capture: None,
+            binding_message: String::new(),
+            keybindings_return_to_pause: false,
         }
     }
 
@@ -73,6 +85,7 @@ impl Menu {
         let click1 = window.is_key_pressed(Key::Key1, KeyRepeat::No);
         let click2 = window.is_key_pressed(Key::Key2, KeyRepeat::No);
         let click3 = window.is_key_pressed(Key::Key3, KeyRepeat::No);
+        let click4 = window.is_key_pressed(Key::Key4, KeyRepeat::No);
 
         // Render titles
         Self::draw_text_centered(
@@ -97,16 +110,16 @@ impl Menu {
         // Define button layouts
         let btn_start = ButtonDef {
             x: 230,
-            y: 160,
+            y: 150,
             w: 340,
-            h: 50,
+            h: 40,
             text: "[1] NEW GAME".to_string(),
         };
         let btn_load = ButtonDef {
             x: 230,
-            y: 230,
+            y: 200,
             w: 340,
-            h: 50,
+            h: 40,
             text: "[2] LOAD MAP".to_string(),
         };
 
@@ -117,17 +130,26 @@ impl Menu {
         };
         let btn_audio = ButtonDef {
             x: 230,
+            y: 250,
+            w: 340,
+            h: 40,
+            text: audio_text.to_string(),
+        };
+
+        // a new option for configuring key bindings on main menu
+        let btn_keybind = ButtonDef {
+            x: 230,
             y: 300,
             w: 340,
-            h: 50,
-            text: audio_text.to_string(),
+            h: 40,
+            text: "[4] CUSTOM KEYBINDING".to_string(),
         };
 
         let btn_quit = ButtonDef {
             x: 230,
-            y: 370,
+            y: 350,
             w: 340,
-            h: 50,
+            h: 40,
             text: "[ESC] QUIT GAME".to_string(),
         };
 
@@ -155,6 +177,15 @@ impl Menu {
             return AppState::StartScreen;
         }
 
+        let click4 = window.is_key_pressed(Key::Key4, KeyRepeat::No);
+        if self.draw_flat_button(buffer, &btn_keybind, mx, my) && clicked || click4 {
+            self.key_capture = None;
+            self.binding_message.clear();
+            self.keybindings_return_to_pause = false;
+            return AppState::Keybind;
+        }
+
+
         if self.draw_flat_button(buffer, &btn_quit, mx, my) && clicked {
             return AppState::Quit;
         }
@@ -162,6 +193,30 @@ impl Menu {
         // Keep looping in the menu until an action changes the state
         AppState::StartScreen
     }
+
+    // new function to handle new keybindings
+    pub fn display_and_update_keybinding(
+        &mut self,
+        window: &mut Window,
+        buffer: &mut [u32],
+    ) -> AppState {
+        buffer.fill(COL_BG_MAIN);
+        Self::draw_text_centered(
+            buffer,
+            SCREEN_WIDTH,
+            SCREEN_HEIGHT,
+            "KEYBINDINGS TO BE DONE",
+            100,
+            2,
+            COL_TEXT_WHITE,
+        );
+        if window.is_key_pressed(Key::Escape, KeyRepeat::No) {
+        return AppState::StartScreen;
+        }
+        
+        AppState::Keybind
+    }
+
 
     /// Renders the death screen and allows the user to save their current level progress.
     pub fn update_and_draw_game_over(

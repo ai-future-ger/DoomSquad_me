@@ -58,6 +58,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut game = game::Game::new_game(&renderer_data).unwrap();
     let mut audio = Audio::init();
     let mut menu = Menu::new();
+    //let mut custom_bind = CustomBind::load();
 
     let mut app_state = AppState::StartScreen;
 
@@ -116,6 +117,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         &mut audio,
                     );
                 }
+            }
+            // definition of a new state to handle keybindings    
+            AppState::Keybind => {
+                window.set_cursor_visibility(true);
+                 app_state = menu.display_and_update_keybinding(
+                        &mut window,
+                        &mut buffer,
+                    );
             }
 
             AppState::GameOver => {
