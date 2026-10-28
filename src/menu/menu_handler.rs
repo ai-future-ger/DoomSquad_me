@@ -201,15 +201,10 @@ impl Menu {
         buffer: &mut [u32],
     ) -> AppState {
         buffer.fill(COL_BG_MAIN);
-        Self::draw_text_centered(
-            buffer,
-            SCREEN_WIDTH,
-            SCREEN_HEIGHT,
-            "KEYBINDINGS TO BE DONE",
-            100,
-            2,
-            COL_TEXT_WHITE,
-        );
+        Self::draw_text_centered(buffer, SCREEN_WIDTH, SCREEN_HEIGHT, "CONFIGURE KEY BINDINGS", 18, 3, COL_TITLE_BLUE);
+        Self::draw_text(buffer, SCREEN_WIDTH, SCREEN_HEIGHT,
+            "Choose a binding -> press a key to select. ESC = cancel or back.", 70, 58, 1, COL_TEXT_WHITE);
+
         if window.is_key_pressed(Key::Escape, KeyRepeat::No) {
         return AppState::StartScreen;
         }
