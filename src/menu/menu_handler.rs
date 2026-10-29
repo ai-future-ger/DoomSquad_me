@@ -189,7 +189,7 @@ impl Menu {
     }
 
     // new function to handle new keybindings
-    //updated the function to draw the actions and related keybuttons 
+    //updated the function to draw the actions and related keybuttons
     //also possible to change keybinding
     pub fn display_and_update_keybinding(
         &mut self,
@@ -197,7 +197,7 @@ impl Menu {
         buffer: &mut [u32],
         keybinding: &mut Keybindings,
     ) -> AppState {
-        buffer.fill(COL_BG_MAIN); 
+        buffer.fill(COL_BG_MAIN);
         Self::draw_text_centered(buffer, SCREEN_WIDTH, SCREEN_HEIGHT, "CONFIGURE KEY BINDINGS", 18, 3, COL_TITLE_BLUE);
         Self::draw_text(buffer, SCREEN_WIDTH, SCREEN_HEIGHT,
             "Choose a binding -> press a key to select. ESC = cancel or back.", 70, 58, 1, COL_TEXT_WHITE);

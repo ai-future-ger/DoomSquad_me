@@ -4,29 +4,29 @@ use minifb::Key;
 
 // creating all possible actions
 pub enum Action {
-    MoveForward, MoveBackward, MoveLeft, MoveRight, 
+    MoveForward, MoveBackward, MoveLeft, MoveRight,
     Sprint, Jump, Crouch, RocketJump, Interact, AimUp, AimDown,TurnLeft, TurnRight,
-    ToggleAim, FireBullet, FireArrow, ToggleGodMode, FlyUp,FlyDown, LockActiveEnemies, 
+    ToggleAim, FireBullet, FireArrow, ToggleGodMode, FlyUp,FlyDown, LockActiveEnemies,
 }
 
 // array of Actions
 pub const ALL_ACTIONS: [Action; 20] = [
     Action::MoveForward, Action::MoveBackward, Action::MoveLeft, Action::MoveRight,
-    Action::Sprint, Action::Jump,  Action::Crouch, Action::RocketJump, Action::Interact,  
-    Action::AimUp, Action::AimDown, Action::TurnLeft, Action::TurnRight, 
+    Action::Sprint, Action::Jump,  Action::Crouch, Action::RocketJump, Action::Interact,
+    Action::AimUp, Action::AimDown, Action::TurnLeft, Action::TurnRight,
     Action::ToggleAim,  Action::FireBullet, Action::FireArrow,
     Action::ToggleGodMode, Action::FlyUp, Action::FlyDown,
-    Action::LockActiveEnemies, 
-];
+    Action::LockActiveEnemies,
+    ];
 
 // creating labels for Actions
 impl Action {
     pub fn label(self) -> &'static str {
         match self {
             Self::MoveForward => "Move forward", Self::MoveBackward => "Move backward",
-            Self::MoveLeft => "Move Left", Self::MoveRight => "Move Right",            
+            Self::MoveLeft => "Move Left", Self::MoveRight => "Move Right",
             Self::Sprint => "Sprint", Self::Jump => "Jump",  Self::Crouch => "Crouch", Self::RocketJump => "Rocket jump",
-            Self::Interact => "Interact",  Self::AimUp => "Aim up", Self::AimDown => "Aim down", 
+            Self::Interact => "Interact",  Self::AimUp => "Aim up", Self::AimDown => "Aim down",
             Self::TurnLeft => "Turn Left", Self::TurnRight => "Turn Right",
             Self::ToggleAim => "Toggle aim mode", Self::FireBullet => "Fire bullet", Self::FireArrow => "Fire arrow",
             Self::ToggleGodMode => "Toggle God mode", Self::FlyUp => "Fly up (God mode)", Self::FlyDown => "Fly down (God mode)",
@@ -38,29 +38,29 @@ impl Action {
 // declaring the default doom style controls to be used for custom keybindings
 pub struct Keybindings {
             move_forward: String, move_backward: String, move_left: String,
-            move_right: String, sprint: String, jump:String, 
-            crouch: String, rocket_jump: String, interact:String, 
+            move_right: String, sprint: String, jump:String,
+            crouch: String, rocket_jump: String, interact:String,
             aim_up: String, aim_down: String, turn_left: String, turn_right:String,
-            toggle_aim: String, fire_bullet: String,fire_arrow: String,  
+            toggle_aim: String, fire_bullet: String,fire_arrow: String,
             //god mode controls
-            toggle_god_mode: String, fly_up: String, fly_down: String, 
-            lock_active_enemies: String, 
+            toggle_god_mode: String, fly_up: String, fly_down: String,
+            lock_active_enemies: String,
 }
 
-// defining the initial keybindings (default doom style controls with default keybindings) for the game, 
+// defining the initial keybindings (default doom style controls with default keybindings) for the game,
 impl Default for Keybindings {
     fn default() -> Self {
         if crate::DEBUG { println!("Using default keybindings.");
         }
         Self {
             move_forward: "W".to_string(), move_backward: "S".to_string(), move_left: "A".to_string(),
-            move_right: "D".to_string(), sprint: "LeftShift".to_string(), jump: "Space".to_string(), 
-            crouch: "C".to_string(), rocket_jump: "R".to_string(), interact: "F".to_string(), 
+            move_right: "D".to_string(), sprint: "LeftShift".to_string(), jump: "Space".to_string(),
+            crouch: "C".to_string(), rocket_jump: "R".to_string(), interact: "F".to_string(),
             aim_up: "Up".to_string(), aim_down: "Down".to_string(), turn_left: "Left".to_string(), turn_right: "Right".to_string(),
-            toggle_aim: "E".to_string(), fire_bullet: "RightCtrl".to_string(),fire_arrow: "RightShift".to_string(),  
+            toggle_aim: "E".to_string(), fire_bullet: "RightCtrl".to_string(),fire_arrow: "RightShift".to_string(),
             //god mode controls
-            toggle_god_mode: "G".to_string(), fly_up: "Space".to_string(), fly_down: "LeftShift".to_string(), 
-            lock_active_enemies: "L".to_string(), 
+            toggle_god_mode: "G".to_string(), fly_up: "Space".to_string(), fly_down: "LeftShift".to_string(),
+            lock_active_enemies: "L".to_string(),
         }
     }
 }
@@ -69,11 +69,11 @@ impl Keybindings {
     //load default keybindings
     pub fn load() -> Self {
         // use default values
-        Self::default()                
+        Self::default()
     }
 
     // return keyboard key for given Action, from Keybinding
-    pub fn key(&self, action: Action) -> Key {        
+    pub fn key(&self, action: Action) -> Key {
         match key_from_name(self.name(action)) {
         Some(key) => key,
         None => default_key(action),
@@ -139,7 +139,7 @@ pub fn key_from_name(s: &str) -> Option<Key> {
         "H"=>Key::H,"I"=>Key::I,"J"=>Key::J,"K"=>Key::K,"L"=>Key::L,"M"=>Key::M,"N"=>Key::N,
         "O"=>Key::O,"P"=>Key::P,"Q"=>Key::Q,"R"=>Key::R,"S"=>Key::S,"T"=>Key::T,"U"=>Key::U,
         "V"=>Key::V,"W"=>Key::W,"X"=>Key::X,"Y"=>Key::Y,"Z"=>Key::Z,
-        "Key0"=>Key::Key0,"Key1"=>Key::Key1,"Key2"=>Key::Key2,"Key3"=>Key::Key3,"Key4"=>Key::Key4,  
+        "Key0"=>Key::Key0,"Key1"=>Key::Key1,"Key2"=>Key::Key2,"Key3"=>Key::Key3,"Key4"=>Key::Key4,
         "Key5"=>Key::Key5,"Key6"=>Key::Key6,"Key7"=>Key::Key7,"Key8"=>Key::Key8,"Key9"=>Key::Key9,
         "F1"=>Key::F1,"F2"=>Key::F2,"F3"=>Key::F3,"F4"=>Key::F4,"F5"=>Key::F5,"F6"=>Key::F6,
         "F7"=>Key::F7,"F8"=>Key::F8,"F9"=>Key::F9,"F10"=>Key::F10,"F11"=>Key::F11,"F12"=>Key::F12,
