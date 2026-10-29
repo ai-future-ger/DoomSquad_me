@@ -11,6 +11,7 @@ use std::fs;
 use crate::audio::audio_handler::Audio;
 use crate::game::gamestate::Game;
 use crate::render::RendererData;
+use crate::custom_key_bindings::{Action,Keybindings, ALL_ACTIONS};
 
 const SCREEN_WIDTH: usize = 800;
 const SCREEN_HEIGHT: usize = 450;
@@ -23,6 +24,8 @@ const COL_TITLE_BLUE: u32 = 0x44AAFF;
 const COL_BTN_NORMAL: u32 = 0x444444;
 const COL_BTN_HOVER: u32 = 0xAA0000;
 const COL_TEXT_WHITE: u32 = 0xFFFFFF;
+const COL_BINDINGS_TEXT: u32 = 0x39FF14;
+const COL_SELECTED_ACTION: u32 = 0xAA6600;
 
 /// Dictates the high-level routing in the `main.rs` loop.
 pub enum AppState {
@@ -33,12 +36,6 @@ pub enum AppState {
     Keybind,
     Quit,
 }
-
-pub enum Action {
-    // Spielaktionen hier definiert
-    Action1
-}
-
 /// Simple layout container for button definitions.
 struct ButtonDef {
     x: usize,
@@ -55,7 +52,6 @@ pub struct Menu {
     was_mouse_down: bool,
     key_capture: Option<Action>,
     binding_message: String,
-    keybindings_return_to_pause: bool,
 }
 
 impl Menu {
@@ -64,7 +60,6 @@ impl Menu {
             was_mouse_down: false,
             key_capture: None,
             binding_message: String::new(),
-            keybindings_return_to_pause: false,
         }
     }
 
@@ -181,7 +176,6 @@ impl Menu {
         if self.draw_flat_button(buffer, &btn_keybind, mx, my) && clicked || click4 {
             self.key_capture = None;
             self.binding_message.clear();
-            self.keybindings_return_to_pause = false;
             return AppState::Keybind;
         }
 
@@ -195,22 +189,79 @@ impl Menu {
     }
 
     // new function to handle new keybindings
+    //updated the function to draw the actions and related keybuttons 
+    //also possible to change keybinding
     pub fn display_and_update_keybinding(
         &mut self,
         window: &mut Window,
         buffer: &mut [u32],
+        keybinding: &mut Keybindings,
     ) -> AppState {
-        buffer.fill(COL_BG_MAIN);
+        buffer.fill(COL_BG_MAIN); 
         Self::draw_text_centered(buffer, SCREEN_WIDTH, SCREEN_HEIGHT, "CONFIGURE KEY BINDINGS", 18, 3, COL_TITLE_BLUE);
         Self::draw_text(buffer, SCREEN_WIDTH, SCREEN_HEIGHT,
             "Choose a binding -> press a key to select. ESC = cancel or back.", 70, 58, 1, COL_TEXT_WHITE);
 
-        if window.is_key_pressed(Key::Escape, KeyRepeat::No) {
-        return AppState::StartScreen;
+        let (mx, my, clicked) = self.get_mouse_state(window);
+        let keys_pressed = window.get_keys_pressed(KeyRepeat::No);
+        if let Some(action) = self.key_capture {
+            if keys_pressed.contains(&Key::Escape) {
+                self.key_capture = None;
+                self.binding_message = "Key assignment cancelled.".to_string();
+            } else if let Some(key) = keys_pressed.first().copied() {
+                //set new keybinding for new action
+                    keybinding.set(action, key);
+                    self.key_capture = None;
+                }
         }
-        
+
+        // draw key bindings for all actions
+        for (index, action) in ALL_ACTIONS.iter().copied().enumerate() {
+            // 10 rows in one column
+            let (x, y) = if index < 10 {
+                (24usize, 105usize + index * 29)
+            } else {
+                (414usize, 105usize + (index - 10) * 29)
+            };
+            // Actions Labels to be displayed
+            let label = action.label();
+            Self::draw_text(buffer, SCREEN_WIDTH, SCREEN_HEIGHT, label, x, y + 7, 1, COL_TEXT_WHITE);
+            let bx = if index < 10 { 250 } else { 640 };
+            let by = y;
+            let bw = 125;
+            let bh = 25;
+            let selected = self.key_capture == Some(action);
+            //showing button colors based on hover/selection
+            let hover = mx >= bx && mx <= bx + bw && my >= by && my <= by + bh;
+            let color = if selected { COL_SELECTED_ACTION } else if hover { COL_BTN_HOVER } else { COL_BTN_NORMAL };
+            for row in by..(by + bh) {
+                for col in bx..(bx + bw) {
+                    if row < SCREEN_HEIGHT && col < SCREEN_WIDTH { buffer[row * SCREEN_WIDTH + col] = color; }
+                }
+            }
+            let key_label = if selected { "PRESS KEY..." } else { keybinding.name(action) };
+            Self::draw_text(buffer, SCREEN_WIDTH, SCREEN_HEIGHT, key_label, bx + 5, by + 8, 1, COL_TEXT_WHITE);
+            if clicked && hover {
+                self.key_capture = Some(action);
+                self.binding_message = format!("Press a key for {}", action.label());
+            }
+        }
+
+        if !self.binding_message.is_empty() {
+            Self::draw_text(buffer, SCREEN_WIDTH, SCREEN_HEIGHT, &self.binding_message, 24, 397, 1, COL_BINDINGS_TEXT);
+        }
+        //creating the back button
+        let back = ButtonDef { x: 640, y: 410, w: 135, h: 28, text: "BACK".to_string() };
+        if self.draw_flat_button(buffer, &back, mx, my) && clicked {
+            self.key_capture = None;
+            return { AppState::StartScreen };
+        }
+        if keys_pressed.contains(&Key::Escape) && self.key_capture.is_none() {
+            return { AppState::StartScreen };
+        }
         AppState::Keybind
     }
+
 
 
     /// Renders the death screen and allows the user to save their current level progress.

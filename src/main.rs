@@ -5,13 +5,18 @@ mod game;
 mod menu;
 mod parser;
 mod render;
+mod custom_key_bindings;
 
 use crate::audio::audio_handler::Audio;
 use crate::menu::menu_handler::{AppState, Menu};
+use crate::custom_key_bindings::Keybindings;
 use crate::render::{RendererData, render_init};
 use minifb::{Key, KeyRepeat, Window, WindowOptions};
 use std::f64::consts::PI;
 use std::time::Instant;
+
+// added debug option to print messages during development
+pub const DEBUG: bool = false;
 
 const SCREEN_WIDTH: usize = 800;
 const SCREEN_HEIGHT: usize = 450;
@@ -58,7 +63,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut game = game::Game::new_game(&renderer_data).unwrap();
     let mut audio = Audio::init();
     let mut menu = Menu::new();
-    //let mut custom_bind = CustomBind::load();
+    //load default Keybindings
+    let mut keybinding = Keybindings::load();
 
     let mut app_state = AppState::StartScreen;
 
@@ -124,6 +130,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                  app_state = menu.display_and_update_keybinding(
                         &mut window,
                         &mut buffer,
+                        &mut keybinding,
                     );
             }
 
