@@ -124,7 +124,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     );
                 }
             }
-            // definition of a new state to handle keybindings    
+            // definition of a new state to handle keybindings
             AppState::Keybind => {
                 window.set_cursor_visibility(true);
                  app_state = menu.display_and_update_keybinding(

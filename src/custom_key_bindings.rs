@@ -103,6 +103,29 @@ impl Keybindings {
         // dereferencing the String pointer for the given action, to assign new key value
         *self.name_mut(action) = key_str;
     }
+    //returning conflicting action
+    pub fn conflict_action (&self, action: Action, key: Key) -> Option<Action>{
+        for other in ALL_ACTIONS.iter().copied(){
+            // if same action as the one provided in the function
+            if other == action{
+                continue;
+            }
+            //do not consider same keys in different modes
+            if matches!(
+                (action, other),
+                (Action::Jump, Action::FlyUp)
+                    |(Action::FlyUp,Action::Jump)
+                    |(Action::Sprint, Action::FlyDown)
+                    |(Action::FlyDown, Action::Sprint)
+            ){
+                continue;
+            }
+            if self.key(other) == key{
+                return Some(other);
+            }
+        }
+        None
+    }
 
     fn name_mut(&mut self, action: Action) -> &mut String {
         match action {

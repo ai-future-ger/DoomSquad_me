@@ -80,7 +80,6 @@ impl Menu {
         let click1 = window.is_key_pressed(Key::Key1, KeyRepeat::No);
         let click2 = window.is_key_pressed(Key::Key2, KeyRepeat::No);
         let click3 = window.is_key_pressed(Key::Key3, KeyRepeat::No);
-        let click4 = window.is_key_pressed(Key::Key4, KeyRepeat::No);
 
         // Render titles
         Self::draw_text_centered(
@@ -205,15 +204,25 @@ impl Menu {
         let (mx, my, clicked) = self.get_mouse_state(window);
         let keys_pressed = window.get_keys_pressed(KeyRepeat::No);
         if let Some(action) = self.key_capture {
+            // ESC pressed in key binding window
             if keys_pressed.contains(&Key::Escape) {
                 self.key_capture = None;
                 self.binding_message = "Key assignment cancelled.".to_string();
-            } else if let Some(key) = keys_pressed.first().copied() {
-                //set new keybinding for new action
-                    keybinding.set(action, key);
-                    self.key_capture = None;
+            }
+            // check if there is a conflict in keybinding
+            else if let Some(key) = keys_pressed.first().copied() {
+                if let Some(conflict) = keybinding.conflict_action(action,key){
+                    self.binding_message = format!("{} is using {:?}, therefore choose other key.", conflict.label(),key);
+                    }
+                // if no conflict assign the key to the action
+                else{
+                        //set new keybinding for new action
+                        keybinding.set(action, key);
+                        self.key_capture = None;
+                    }
                 }
         }
+
 
         // draw key bindings for all actions
         for (index, action) in ALL_ACTIONS.iter().copied().enumerate() {
@@ -254,10 +263,10 @@ impl Menu {
         let back = ButtonDef { x: 640, y: 410, w: 135, h: 28, text: "BACK".to_string() };
         if self.draw_flat_button(buffer, &back, mx, my) && clicked {
             self.key_capture = None;
-            return { AppState::StartScreen };
+            return  AppState::StartScreen;
         }
         if keys_pressed.contains(&Key::Escape) && self.key_capture.is_none() {
-            return { AppState::StartScreen };
+            return AppState::StartScreen;
         }
         AppState::Keybind
     }
